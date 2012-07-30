@@ -4,6 +4,7 @@
 *.gtf
 *.bam
 *.bai
+*.txt
 
 # complied files   #
 ####################
