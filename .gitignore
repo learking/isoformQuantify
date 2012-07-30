@@ -7,7 +7,7 @@
 
 # complied files   #
 ####################
-.pyc
+*.pyc
 
 # Editor generated files #
 ##########################
@@ -15,5 +15,5 @@
 
 # system files #
 ################
-.goutputstream-UW8EGW
-.DS_Store
+*.goutputstream-UW8EGW
+*.DS_Store
