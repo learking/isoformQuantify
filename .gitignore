@@ -1,0 +1,19 @@
+#    data files   #
+###################
+*.sam
+*.gtf
+*.bam
+*.bai
+
+# complied files   #
+####################
+.pyc
+
+# Editor generated files #
+##########################
+*~
+
+# system files #
+################
+.goutputstream-UW8EGW
+.DS_Store
