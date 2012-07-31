@@ -287,3 +287,15 @@ class sudoSpliceJunction:
         self.length = 0
         self.ratio = 0
         self.readCount = 0
+
+class mgi2ensembl:
+    
+    def __init__(self, inputFile):
+        self.mapping = getMapping(inputFile)
+
+    def getMapping(self, inputFile):
+        mgi2ensembl_mapping = {}
+        for line in inputFile:
+            tmpLine = line.strip().split()
+            mgi2ensembl_mapping[tmpLine[0]] = tmpLine[1].split(':')[1]
+        return mgi2ensembl_mapping

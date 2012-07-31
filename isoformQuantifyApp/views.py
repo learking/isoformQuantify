@@ -43,9 +43,3 @@ def initializeGeneJSON(request, geneID):
         return HttpResponse(json.dumps(targetGene.toDict()), content_type = json_content_type)
     else:
         return HttpResponse(json.dumps({'fileExist': 0}), content_type = json_content_type)
-
-def testGeneLookUp(request):
-    params = {
-        'STATIC_URL' : '/static/',
-    }
-    return render_to_response('testGeneLookUp.html', params)

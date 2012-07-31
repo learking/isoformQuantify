@@ -9,7 +9,6 @@ urlpatterns = patterns('',
     url(r'^isoformQuantify/gene_(\w+)\.json$', 'isoformQuantifyApp.views.initializeGeneJSON'),
     url(r'^isoformQuantify/$', 'isoformQuantifyApp.views.index'),
 
-    url(r'^isoformQuantify/testGeneLookUp/$', 'isoformQuantifyApp.views.testGeneLookUp'),
     # Examples:
     # url(r'^$', 'isoformQuantify.views.home', name='home'),
     # url(r'^isoformQuantify/', include('isoformQuantify.foo.urls')),
