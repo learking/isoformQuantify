@@ -16,7 +16,7 @@ def index(request):
     return render_to_response('index.html', params)
 
 def writeGTF(fileName, geneID):
-    command_process = subprocess.Popen(['grep', geneID, './isoformQuantifyApp/data/Mus_musculus.NCBIM37.67.exons.gtf'], stdout=subprocess.PIPE)
+    command_process = subprocess.Popen(['grep', geneID, './isoformQuantifyApp/data/gtf/Mus_musculus.NCBIM37.67.exons.gtf'], stdout=subprocess.PIPE)
     command_output = command_process.communicate()[0]
 
     if command_output != "":
@@ -25,7 +25,7 @@ def writeGTF(fileName, geneID):
         FILE.close()
 
 def initializeGeneJSON(request, geneID):
-    fileName = "./isoformQuantifyApp/data/" + geneID + ".gtf"
+    fileName = "./isoformQuantifyApp/data/gtf/" + geneID + ".gtf"
 
     if not os.path.exists(fileName):
         writeGTF(fileName, geneID)
