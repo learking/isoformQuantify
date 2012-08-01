@@ -18,13 +18,13 @@ var canvas_width = 1800,
 
     editButton_width = 80,
     editButton_height = 40,
-    editButton_xPosition = 1400,
+    editButton_xPosition = 1315,
     editButton_textX = editButton_xPosition + 13,
     editButton_yPosition = referenceLine_yPosition - editButton_height/2,
     editButton_textY = editButton_yPosition + editButton_height - 8,
     deleteButton_width = 80,
     deleteButton_height = 40,
-    deleteButton_xPosition = 1500,
+    deleteButton_xPosition = 1400,
     deleteButton_textX = deleteButton_xPosition,
     deleteButton_yPosition = editButton_yPosition,
     deleteButton_textY = deleteButton_yPosition + deleteButton_height -8 ,
@@ -85,7 +85,9 @@ var chooseTranscriptRegion = function(transcriptBackground, transcriptNr, json, 
 	// exclude this transcript and recalculate results
         // all we need to do is to set transcript.exons = []
 	json.transcripts[transcriptNr].exons = [];
-	console.log(json);
+	if(debug_flag){
+	    console.log(json);
+	}
 	getIsoformAbundance(json);
     }
     else{
@@ -390,7 +392,9 @@ var renderTranscripts = function(elem, json_raw){
 	chooseTranscriptRegion(d, i, json, json_raw);
     };
 
-    console.log(json);
+    if(debug_flag){
+	console.log(json);
+    }
 
     var geneStart = parseInt(json.start);
     var geneEnd = parseInt(json.end);

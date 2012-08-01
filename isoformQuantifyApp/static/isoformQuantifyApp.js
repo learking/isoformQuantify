@@ -1,3 +1,4 @@
+var debug_flag = false;
 var gene_mgi_id;
 var fileSelected;
 
@@ -68,7 +69,7 @@ var getGeneHits = function(geneHits){
 var calculateIsoforms = function (form) {
     var userQuery = form.geneSearchBox.value.match(/\w+/)[0];
     fileSelected = form.fileSelection.value;
-    console.log(fileSelected);
+    //console.log(fileSelected);
     jsonp("http://cbfg-dev/gene_name_lookup.php?genes=" + userQuery + "&callback=getGeneHits");
 };
 
@@ -88,7 +89,9 @@ var getIsoformAbundance = function(json){
 	    data: JSON.stringify(json),
 	    success: function(data){
 		showIsoformAbund(data);
-		console.log(data);              
+		if(debug_flag){
+		    console.log(data);              
+		}
 	    },  
 	    error: function(){  
 		console.log("post fail :-(");  
@@ -102,8 +105,8 @@ var showIsoformAbund = function(data){
 	var currentAbund = Math.round(parseFloat(data[key])*1000)/1000;
 	d3.select("#" + key).append("text")
 	.attr("id", "transcript_abund")
-	.attr("x", 1220)
-	.attr("y", 60)
+	.attr("x", 1210)
+	.attr("y", 65)
 	.attr("font-size", 40)
 	.text(currentAbund.toString());
     }
