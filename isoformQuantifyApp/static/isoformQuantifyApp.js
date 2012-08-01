@@ -1,4 +1,5 @@
 var gene_mgi_id;
+var fileSelected;
 
 var jsonp = function(url) {
     var head = document.head;
@@ -66,7 +67,8 @@ var getGeneHits = function(geneHits){
 
 var calculateIsoforms = function (form) {
     var userQuery = form.geneSearchBox.value.match(/\w+/)[0];
-    var fileSelected = form.fileSelection.value;
+    fileSelected = form.fileSelection.value;
+    console.log(fileSelected);
     jsonp("http://cbfg-dev/gene_name_lookup.php?genes=" + userQuery + "&callback=getGeneHits");
 };
 
@@ -78,6 +80,7 @@ var runScript = function(e, form){
 };
 
 var getIsoformAbundance = function(json){
+    json['bamFile'] = fileSelected;
     $.ajax({  
 	    url: "../getIsoformAbund",  
 	    type: "POST",  

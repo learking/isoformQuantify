@@ -14,12 +14,14 @@ def getReads(gene):
     geneChr = gene['chr']
     geneStart = gene['start']
     geneEnd = gene['end']
+    bamFile = gene['bamFile']
+    bamFileName = bamFile.split('.')[0]
 
     samtoolsFile = '/home/s-kwang/software/samtools-0.1.18/samtools'
     samtoolsOption = 'view'
     samtoolsOutput = '-o'
-    samFile = '/home/s-kwang/webApp/isoformQuantify/isoformQuantifyApp/data/sam/' + geneID + '.sam'
-    seqFile = '/home/s-kwang/webApp/isoformQuantify/isoformQuantifyApp/data/bam/cno.bam'
+    samFile = '/home/s-kwang/webApp/isoformQuantify/isoformQuantifyApp/data/sam/' + geneID + '_' + bamFileName +'.sam'
+    seqFile = '/home/s-kwang/webApp/isoformQuantify/isoformQuantifyApp/data/bam/' + bamFile
     chrRegion = 'chr' + geneChr + ':' + str(geneStart) + '-' + str(geneEnd)
 
     reads = Reads()
