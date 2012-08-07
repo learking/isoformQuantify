@@ -1,5 +1,5 @@
-var canvas_width = 1800,
-    controlpanel_width = 600,
+var canvas_width = 2500,
+    controlpanel_width = 1300,
     geneGraph_width = canvas_width - controlpanel_width,
     transcriptRegion_height = 100,
     referenceLine_yPosition = transcriptRegion_height / 2,
@@ -18,16 +18,18 @@ var canvas_width = 1800,
 
     editButton_width = 80,
     editButton_height = 40,
-    editButton_xPosition = 1315,
+    editButton_xPosition = 1210,
     editButton_textX = editButton_xPosition + 13,
     editButton_yPosition = referenceLine_yPosition - editButton_height/2,
     editButton_textY = editButton_yPosition + editButton_height - 8,
     deleteButton_width = 80,
     deleteButton_height = 40,
-    deleteButton_xPosition = 1400,
+    deleteButton_xPosition = 1295,
     deleteButton_textX = deleteButton_xPosition,
     deleteButton_yPosition = editButton_yPosition,
     deleteButton_textY = deleteButton_yPosition + deleteButton_height -8 ,
+    addTranscript_textX = geneGraph_width/2 - 200,
+addTranscript_textY = transcriptRegion_height/2 + 10,
 
     zeroOpacity = 0,
     fullOpacity = 1,
@@ -518,19 +520,18 @@ var renderTranscripts = function(elem, json_raw){
 	.on("click", addTranscript);
 
     svg.select("#addTranscript")
-    .append("text")
-    .attr("x", geneGraph_width/2 - 200)
-    .attr("y", transcriptRegion_height/2 + 10)
-    .attr("font-size", 55)
-    .text("Add a new transcript");
+	.append("text")
+	.attr("x", addTranscript_textX)
+	.attr("y", addTranscript_textY)
+	.attr("font-size", 55)
+	.text("Add a new transcript");
 
 };
 
 var makeGeneGraph = function(json_raw){
 	var elem = d3.select("#chart");
 	elem.select("#geneGraph").remove();
-	renderTranscripts(elem, json_raw);
-  
+	renderTranscripts(elem, json_raw);  
 };
 
 var startoverAlgo = function(json){

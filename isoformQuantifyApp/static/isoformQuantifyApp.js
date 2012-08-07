@@ -145,7 +145,7 @@ var getIsoformAbundance = function(json){
 	    data: JSON.stringify(json),
 	    success: function(data){
 		console.log(data);
-		showIsoformAbund(data[0]);
+		showIsoformAbund(data);
 		if(debug_flag){
 		    console.log(data);              
 		}
@@ -158,13 +158,36 @@ var getIsoformAbundance = function(json){
 
 var showIsoformAbund = function(data){
     d3.selectAll("#transcript_abund").remove();
-    for (var key in data){
-	var currentAbund = Math.round(parseFloat(data[key])*1000)/1000;
-	d3.select("#" + key).append("text")
-	.attr("id", "transcript_abund")
-	.attr("x", 1210)
-	.attr("y", 65)
-	.attr("font-size", 40)
-	.text(currentAbund.toString());
+    d3.select("#transcript_abund_background").remove();
+
+    d3.select("#geneGraph")
+	.append("g")
+	.attr("id", "transcript_abund_background");
+
+    console.log(arSelected.length);
+
+    var trans_abund_background = d3.select("#transcript_abund_background");
+    var trans_abund_background_height = Object.keys(data[0]).length * 100;
+    for (var i = 0; i < arSelected.length; i++){
+	trans_abund_background
+	    .append("rect")
+	    .attr("class", arSelected[i].split(".")[0])
+	    .attr("x", 1385 + i*130)
+	    .attr("y", 0)
+	    .attr("width", 115)
+	    .attr("height", trans_abund_background_height)
+	    .style("fill-opacity", zeroOpacity);
+    }
+
+    for (var i = 0; i < data.length; i++){
+	for (var key in data[i]){
+	    var currentAbund = Math.round(parseFloat(data[i][key])*1000)/1000;
+	    d3.select("#" + key).append("text")
+		.attr("id", "transcript_abund")
+		.attr("x", 1400 + i*130)
+		.attr("y", 65)
+		.attr("font-size", 40)
+		.text(currentAbund.toString());
+	}
     }
 };

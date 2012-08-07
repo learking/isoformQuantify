@@ -1,3 +1,22 @@
+option.skyblue {background-color:#3BB9FF}
+option.yellow {background-color:#FFFF00}
+option.hotpink {background-color:#F660AB}
+option.silver {background-color:#C0C0C0}
+option.springgreen {background-color:#6AFB92}
+option.sienna {background-color:#F87431}
+option.lavender {background-color:#E3E4FA}
+option.firebrick1 {background-color:#F62817}
+
+rect.cno {stroke:#3BB9FF; stroke-width:10}
+rect.f1 {stroke:#FFFF00; stroke-width:10}
+rect.spcar3 {stroke:#F660AB; stroke-width:10}
+rect.spcar4 {stroke:#C0C0C0; stroke-width:10}
+
+rect.wt186 {stroke:#6AFB92; stroke-width:10}
+rect.wt444 {stroke:#F87431; stroke-width:10}
+rect.ko188 {stroke:#E3E4FA; stroke-width:10}
+rect.ko418 {stroke:#F62817; stroke-width:10}
+
 ul {
 list-style-type: none;
 padding: 0;
