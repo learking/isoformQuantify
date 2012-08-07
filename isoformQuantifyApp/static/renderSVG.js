@@ -377,6 +377,15 @@ var deleteTranscript_startover = function(d, i, json){
     startoverAlgo(json);
 };
 
+var addTranscript_startover = function(json){
+    var newTranscript = {
+	exons : [],
+	id : "newTranscript"
+    };
+    json.transcripts.push(newTranscript);
+    startoverAlgo(json);
+};
+
 var renderTranscripts = function(elem, json_raw){
     var json = jQuery.extend(true, {}, json_raw);
 
@@ -386,6 +395,10 @@ var renderTranscripts = function(elem, json_raw){
 
     var deleteTranscript = function(d, i){
 	deleteTranscript_startover(d, i, json);
+    };
+
+    var addTranscript = function(){
+	addTranscript_startover(json);
     };
 
     var switchTranscriptStatus = function(d, i){
@@ -401,7 +414,7 @@ var renderTranscripts = function(elem, json_raw){
 
     var svg = elem
     .attr("width", canvas_width)
-    .attr("height",json.transcripts.length * 200)
+    .attr("height",json.transcripts.length * 200 + 200)
     .append("svg")
     .attr("id", "geneGraph")
     .attr("width", elem.attr("width"))
@@ -489,6 +502,20 @@ var renderTranscripts = function(elem, json_raw){
     .style("fill-opacity", zeroOpacity)
     .on("click", function(d, i){deleteTranscript(d, i)});
 
+    
+    svg.append("g")
+    .attr("id", "addTranscript")
+    .attr("transform", "translate(0," + json.transcripts.length*transcriptRegion_height + ")")
+	.append("rect")
+	.attr("id", "addButton")
+	.attr("x", 0)
+	.attr("y", 0)
+	.attr("width", geneGraph_width)
+	.attr("height", transcriptRegion_height)
+	.attr("stroke", "red")
+	.attr("stroke-width", 3)
+	.style("fill-opacity", zeroOpacity)
+	.on("click", addTranscript);
 };
 
 var makeGeneGraph = function(json_raw){
@@ -499,6 +526,11 @@ var makeGeneGraph = function(json_raw){
 };
 
 var startoverAlgo = function(json){
+    for(exon_index =0; exon_index < json.exons.length; exon_index ++){
+	if(json.exons[exon_index].clickState){
+	    json.exons[exon_index].clickState = !json.exons[exon_index].clickState;
+	}
+    }  
     makeGeneGraph(json);
     getIsoformAbundance(json);
 };

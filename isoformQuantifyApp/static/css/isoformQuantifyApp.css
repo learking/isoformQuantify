@@ -1,0 +1,34 @@
+ul {
+list-style-type: none;
+padding: 6;
+margin: 2;
+font-size: 20px;
+text-indent: 5px;
+}
+
+label{
+float: left;
+width: 120px;
+font-weight: bold;
+}
+
+input{
+width: 180px;
+margin-bottom: 5px;
+}
+
+select{
+width: 185px;
+margin-bottom: 5px;
+}
+
+.runElement{
+margin-top: 5px;
+font: normal 50px arial, sans-serif;
+height: 100px;
+width: 305px;
+}
+
+br{
+clear: left;
+}

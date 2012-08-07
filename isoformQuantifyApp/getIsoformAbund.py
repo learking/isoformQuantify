@@ -7,41 +7,46 @@ import os
 from scipy.optimize import nnls
 from models import *
 
-debug_flag = False
+debug_flag = True
 
 def getReads(gene):
+    readsSet = []
     geneID = gene['id']
     geneChr = gene['chr']
     geneStart = gene['start']
     geneEnd = gene['end']
-    bamFile = gene['bamFile']
-    bamFileName = bamFile.split('.')[0]
+    bamFiles = gene['bamFiles']
 
     samtoolsFile = '/home/s-kwang/software/samtools-0.1.18/samtools'
     samtoolsOption = 'view'
     samtoolsOutput = '-o'
-    samFile = '/home/s-kwang/webApp/isoformQuantify/isoformQuantifyApp/data/sam/' + geneID + '_' + bamFileName +'.sam'
-    seqFile = '/home/s-kwang/webApp/isoformQuantify/isoformQuantifyApp/data/bam/' + bamFile
     chrRegion = 'chr' + geneChr + ':' + str(geneStart) + '-' + str(geneEnd)
 
-    reads = Reads()
-    if not os.path.exists(samFile):
-        process = subprocess.Popen([samtoolsFile, samtoolsOption, samtoolsOutput, samFile, seqFile, chrRegion])
+    for bamFile in bamFiles:
+        bamFileName = bamFile.split('.')[0]
+    
+        samFile = '/home/s-kwang/webApp/isoformQuantify/isoformQuantifyApp/data/sam/' + geneID + '_' + bamFileName +'.sam'
+        seqFile = '/home/s-kwang/webApp/isoformQuantify/isoformQuantifyApp/data/bam/' + bamFile
+
+        reads = Reads()
+        if not os.path.exists(samFile):
+            process = subprocess.Popen([samtoolsFile, samtoolsOption, samtoolsOutput, samFile, seqFile, chrRegion])
         #for line in open('./isoformQuantifyApp/data/Apoe.sam'):
-        if process.wait() == 0:
+            if process.wait() == 0:
+                for line in open(samFile):
+                    line = line.rstrip()
+                    parts = line.split('\t')
+                    reads.addRead(ShortRead(parts))
+        else:
             for line in open(samFile):
                 line = line.rstrip()
                 parts = line.split('\t')
                 reads.addRead(ShortRead(parts))
-    else:
-        for line in open(samFile):
-            line = line.rstrip()
-            parts = line.split('\t')
-            reads.addRead(ShortRead(parts))
 
-    reads.seperateReads()
-    reads.initializeLength()    
-    return reads
+        reads.seperateReads()
+        reads.initializeLength()    
+        readsSet.append(reads)
+    return readsSet
 
 def getGeneExons(geneExons):
     exons = []
@@ -140,6 +145,7 @@ def iniJunctions(transcripts, exons, subExons, readLength):
 def count_readsWithinSubexons(subExons, reads):
     readLength = reads.length
     for subExon in subExons:
+        subExon.readCounts = 0
         for read in reads.wholeReads:
             if int(read.start) >= int(subExon.start) and int(read.start) + (readLength - 1) <= int(subExon.end):
                 subExon.readCounts += 1
@@ -179,6 +185,7 @@ def count_sudoSpliceJunction_allTranscripts(transcripts, reads):
     for transcript in transcripts:
         for sudoSpliceJunction in transcript.sudoSpliceJunctions:
             currentSudoSpliceJunction = transcript.sudoSpliceJunctions[sudoSpliceJunction]
+            currentSudoSpliceJunction.readCount = 0
             for read in reads.wholeReads:
                 if int(read.start) >= int(currentSudoSpliceJunction.left) and int(read.start) + (readLength - 1) <= int(currentSudoSpliceJunction.right):
                     currentSudoSpliceJunction.readCount += 1                
@@ -197,107 +204,82 @@ def get_sudoSpliceJunction_MaxReads(sudoSpliceJunctions, transcripts):
     return sudoSpliceJunctionReadCounts
 
 def returnIsoformAbund(request):
+    resultMappingSet = []
     if(debug_flag):
         f = open('./isoformQuantifyApp/data/log.txt', 'w')
 
     gene = simplejson.loads(request.body)
+    readsSet = getReads(gene)
     exons = getGeneExons(gene['exons'])
     subExons = getSubExons(exons)
     transcripts = getGeneTranscripts(gene['transcripts'])
-
-    reads = getReads(gene)
-    readLength = reads.length
-
-    count_readsWithinSubexons(subExons, reads)
     iniTranscripts(transcripts, exons, subExons)
-    iniJunctions(transcripts, exons, subExons, readLength)
     spliceJunctions = getSpliceJunctions(transcripts)
     sudoSpliceJunctions = getSudoSpliceJunctions(transcripts)
 
-    spliceJunctionReadCounts = count_spliceJunction_reads(spliceJunctions, subExons, reads)
-    count_sudoSpliceJunction_allTranscripts(transcripts, reads)
-    sudoSpliceJunctionReadCounts = get_sudoSpliceJunction_MaxReads(sudoSpliceJunctions, transcripts)
+    for reads in readsSet:
+
+           readLength = reads.length
+           count_readsWithinSubexons(subExons, reads)
+           iniJunctions(transcripts, exons, subExons, readLength)
+           spliceJunctionReadCounts = count_spliceJunction_reads(spliceJunctions, subExons, reads)
+           count_sudoSpliceJunction_allTranscripts(transcripts, reads)
+           sudoSpliceJunctionReadCounts = get_sudoSpliceJunction_MaxReads(sudoSpliceJunctions, transcripts)
     
-    designMatrix = []
-    response = []
-    for subExon_index, subExon in enumerate(subExons):
-        if subExon.length >= readLength:
-            currentFeature = []
-            for transcript in transcripts:
-                if subExon_index in transcript.subExons:
-                    subExonPosition = transcript.subExons.index(subExon_index)
-                    currentFeature.append(transcript.subExonPercents[subExonPosition])
-                else:
-                    currentFeature.append(0)
-            if(debug_flag):
-                f.write(str(subExon_index) + ":length:" + str(subExon.length) + ":" + str(currentFeature) + " readCount:" + str(subExon.readCounts) + "\n")
-            designMatrix.append(currentFeature)
-            response.append(subExon.readCounts)
+           designMatrix = []
+           response = []
+           for subExon_index, subExon in enumerate(subExons):
+               if subExon.length >= readLength:
+                   currentFeature = []
+                   for transcript in transcripts:
+                       if subExon_index in transcript.subExons:
+                           subExonPosition = transcript.subExons.index(subExon_index)
+                           currentFeature.append(transcript.subExonPercents[subExonPosition])
+                       else:
+                           currentFeature.append(0)
+                   if(debug_flag):
+                       f.write(str(subExon_index) + ":length:" + str(subExon.length) + ":" + str(currentFeature) + " readCount:" + str(subExon.readCounts) + "\n")
+                   designMatrix.append(currentFeature)
+                   response.append(subExon.readCounts)
 
-    for spliceJunction_index, spliceJunction in enumerate(spliceJunctions):
-        if spliceJunctionReadCounts[spliceJunction_index] > 0:
-            currentFeature = []
-            for transcript in transcripts:
-                if spliceJunction in transcript.spliceJunctions.keys():
-                    currentFeature.append(transcript.spliceJunctions[spliceJunction].ratio)
-                else:
-                    currentFeature.append(0)
-            if(debug_flag):
-                f.write(str(currentFeature) + " readCount:" + str(spliceJunctionReadCounts[spliceJunction_index]) + "\n")
-            designMatrix.append(currentFeature)
-            response.append(spliceJunctionReadCounts[spliceJunction_index])
+           for spliceJunction_index, spliceJunction in enumerate(spliceJunctions):
+               if spliceJunctionReadCounts[spliceJunction_index] > 0:
+                   currentFeature = []
+                   for transcript in transcripts:
+                       if spliceJunction in transcript.spliceJunctions.keys():
+                           currentFeature.append(transcript.spliceJunctions[spliceJunction].ratio)
+                       else:
+                           currentFeature.append(0)
+                   if(debug_flag):
+                       f.write(str(currentFeature) + " readCount:" + str(spliceJunctionReadCounts[spliceJunction_index]) + "\n")
+                   designMatrix.append(currentFeature)
+                   response.append(spliceJunctionReadCounts[spliceJunction_index])
 
-    for sudoSpliceJunction_index, sudoSpliceJunction in enumerate(sudoSpliceJunctions):
-        if sudoSpliceJunctionReadCounts[sudoSpliceJunction_index] > 0:
-            currentFeature = []
-            for transcript in transcripts:
-                if sudoSpliceJunction in transcript.sudoSpliceJunctions.keys():
-                    currentFeature.append(transcript.sudoSpliceJunctions[sudoSpliceJunction].ratio)
-                else:
-                    currentFeature.append(0)
-            if(debug_flag):
-                f.write(str(currentFeature) + " readCount:" + str(sudoSpliceJunctionReadCounts[sudoSpliceJunction_index]) + "\n")
-            designMatrix.append(currentFeature)
-            response.append(sudoSpliceJunctionReadCounts[sudoSpliceJunction_index])        
+           for sudoSpliceJunction_index, sudoSpliceJunction in enumerate(sudoSpliceJunctions):
+               if sudoSpliceJunctionReadCounts[sudoSpliceJunction_index] > 0:
+                   currentFeature = []
+                   for transcript in transcripts:
+                       if sudoSpliceJunction in transcript.sudoSpliceJunctions.keys():
+                           currentFeature.append(transcript.sudoSpliceJunctions[sudoSpliceJunction].ratio)
+                       else:
+                           currentFeature.append(0)
+                   if(debug_flag):
+                       f.write(str(currentFeature) + " readCount:" + str(sudoSpliceJunctionReadCounts[sudoSpliceJunction_index]) + "\n")
+                   designMatrix.append(currentFeature)
+                   response.append(sudoSpliceJunctionReadCounts[sudoSpliceJunction_index])        
 
-    result = nnls(designMatrix, response)[0]
-    normalized_result = [x/sum(result) for x in result ]
-    if(debug_flag):
-        f.write(str(result) + "\n")
+           result = nnls(designMatrix, response)[0]
+           normalized_result = [x/sum(result) for x in result ]
+           if(debug_flag):
+               f.write(str(result) + "\n")
 
-    '''
-    for transcript in transcripts:
-        f.write(transcript.id + " length:"+ str(transcript.length) +" exons: " + str(transcript.exons) + " subexons: " + str(transcript.subExons) + "\n")
-        #f.write(str(transcript.subExonPercents) + " sum:" + str(sum(transcript.subExonPercents)) + "\n")
-        f.write("spliceJunction: ")
-        for key in transcript.spliceJunctions:
-            f.write("||" + str(key) + " length:" + str(transcript.spliceJunctions[key].length)
- + " ratio:" + str(transcript.spliceJunctions[key].ratio))
-        f.write("\n")
-        f.write("sudoSpliceJunction: ")
-        for key in transcript.sudoSpliceJunctions:
-            f.write("||" + str(key) + " length:" + str(transcript.sudoSpliceJunctions[key].length) + " ratio:"+ str(transcript.sudoSpliceJunctions[key].ratio)  + " reads:" + str(transcript.sudoSpliceJunctions[key].readCount))
-        f.write("\n")
+           resultMapping = {}
+           for transcript_index, transcript in enumerate(transcripts):
+               resultMapping['transcript_'+str(transcript_index)] = normalized_result[transcript_index]
 
-    for exon_index, exon in enumerate(exons):
-        f.write("exon " + str(exon_index) + " length:"+ str(exon.length) + " :" + str(exon)+" ")
-        f.write(str(exon.subExons))
-        f.write('\n')
+           resultMappingSet.append(resultMapping)
 
-    for subexon_index, subexon in enumerate(subExons):
-        f.write("subexon " + str(subexon_index) + " :" + str(subexon))
-        f.write('\n')
-
-    f.write(str(spliceJunctions) + "\n")
-    f.write(str(sudoSpliceJunctions) + "\n")
-    f.write(str(spliceJunctionReadCounts) + "\n")
-    f.write(str(sudoSpliceJunctionReadCounts) + "\n")
-    '''
     if(debug_flag):
         f.close()
 
-    resultMapping = {}
-    for transcript_index, transcript in enumerate(transcripts):
-        resultMapping['transcript_'+str(transcript_index)] = normalized_result[transcript_index]
-
-    return HttpResponse(json.dumps(resultMapping))
+    return HttpResponse(json.dumps(resultMappingSet))

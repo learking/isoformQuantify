@@ -7,46 +7,16 @@
 <script type="text/javascript" src="{{ STATIC_URL }}isoformQuantifyApp.js"></script>
 <script type="text/javascript" src="{{ STATIC_URL }}renderSVG.js"></script>
 <script type="text/javascript" src="{{ STATIC_URL }}mgi2ensembl.js"></script>
-<style type="text/css">
-
-label{
-float: left;
-width: 120px;
-font-weight: bold;
-}
-
-input{
-width: 180px;
-margin-bottom: 5px;
-}
-
-select{
-width: 185px;
-margin-bottom: 5px;
-}
-
-.runElement{
-margin-top: 5px;
-font: normal 50px arial, sans-serif;
-height: 100px;
-width: 305px;
-}
-
-br{
-clear: left;
-}
-
-</style>
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}/css/isoformQuantifyApp.css" />
 </head>
 
 <body>
-<form name="geneSearchForm">
+<form name="geneSearchForm" id="geneSearchForm">
 <label for="geneSearchBox">Gene</label>
 <input type="text" name="geneSearchBox" value="" onkeypress="runScript(event, this.form)" /><br />
-
 <label for="fileSelection">RNA-Seq file</label>
 
-   <select name="fileSelection" onchange="calculateIsoforms(this.form)">
+   <select id="fileSelection" name="fileSelection" onchange="calculateIsoforms(this.form)" multiple="multiple">
      <option value="cno.bam">cno_cno_2_GES12_37369_CGATGT_L008_R1_ALL.bam</option>
      <option value="f1.bam">F1.bam</option>
      <option value="spcar3.bam">Spcar3.bam</option>
@@ -58,6 +28,9 @@ clear: left;
    </select><br />
 
 <input class="runElement" TYPE="button" NAME="calculateButton" Value="Calculate" onClick="calculateIsoforms(this.form)"/><br />
+
+<ul>
+</ul>
 
 </form>
 
