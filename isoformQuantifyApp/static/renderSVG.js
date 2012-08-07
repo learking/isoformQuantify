@@ -516,6 +516,14 @@ var renderTranscripts = function(elem, json_raw){
 	.attr("stroke-width", 3)
 	.style("fill-opacity", zeroOpacity)
 	.on("click", addTranscript);
+
+    svg.select("#addTranscript")
+    .append("text")
+    .attr("x", geneGraph_width/2 - 200)
+    .attr("y", transcriptRegion_height/2 + 10)
+    .attr("font-size", 55)
+    .text("Add a new transcript");
+
 };
 
 var makeGeneGraph = function(json_raw){
