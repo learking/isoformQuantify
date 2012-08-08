@@ -214,6 +214,7 @@ var showEditRegion= function(d, transcriptNr, json){
 	alert("Please confirm or cancel current editing task before proceed!");
     }
     else{
+	d3.select("#transcript_abund_background").remove();
 	var xScale = d3.scale.linear().domain([json.start, json.end]).range([0, geneGraph_width]);
 	var xDiff = function(pt1, pt2) { return Math.abs(xScale(pt1) - xScale(pt2)); };
 

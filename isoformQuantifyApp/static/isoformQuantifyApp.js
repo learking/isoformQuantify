@@ -1,7 +1,7 @@
 var debug_flag = false;
 var gene_mgi_id;
-var fileSelected;
 var arSelected = new Array();
+var userQuery;
 
 var jsonp = function(url) {
     var head = document.head;
@@ -104,25 +104,20 @@ var selectDataset = function(select){
             select.options[select.selectedIndex].selected = false;
 	}
 	// You can use the arSelected array for further processing.                 
-	console.log(arSelected);    
     }
 };
 
 var removeOption = function(option){
     arSelected.splice(arSelected.indexOf(option.childNodes[0].value), 1);
     option.parentNode.removeChild(option);
-    console.log(arSelected);
+    jsonp("http://cbfg-dev/gene_name_lookup.php?genes=" + userQuery + "&callback=getGeneHits");
 };
 
 var calculateIsoforms = function (form) {
-    var userQuery;
     if(form.geneSearchBox.value){
 	userQuery = form.geneSearchBox.value.match(/\w+/)[0];
-    //fileSelected = form.fileSelection.value;
-    selectDataset(form.fileSelection);
-    fileSelected = arSelected[0];
-    //console.log(fileSelected);
-    jsonp("http://cbfg-dev/gene_name_lookup.php?genes=" + userQuery + "&callback=getGeneHits");
+	selectDataset(form.fileSelection);
+	jsonp("http://cbfg-dev/gene_name_lookup.php?genes=" + userQuery + "&callback=getGeneHits");
     }
     else{
 	alert("must input a gene to start with!");
@@ -144,7 +139,6 @@ var getIsoformAbundance = function(json){
 	    dataType: "json",
 	    data: JSON.stringify(json),
 	    success: function(data){
-		console.log(data);
 		showIsoformAbund(data);
 		if(debug_flag){
 		    console.log(data);              
@@ -163,8 +157,6 @@ var showIsoformAbund = function(data){
     d3.select("#geneGraph")
 	.append("g")
 	.attr("id", "transcript_abund_background");
-
-    console.log(arSelected.length);
 
     var trans_abund_background = d3.select("#transcript_abund_background");
     var trans_abund_background_height = Object.keys(data[0]).length * 100;
